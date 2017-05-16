@@ -7,8 +7,6 @@
 # 
 # The aim is to program the robot for the second part of the challenge: pick up the balls and transport them to the corner. To do so, you need to reuse the abilities learnt in week 4; please feel free to reuse the code of those notebooks and exercises.
 
-# In[76]:
-
 import packages.initialization
 import packages.pioneer3dx as p3dx
 import time
@@ -20,23 +18,21 @@ p3dx.init()
 time.sleep(2)
 
 
-# In[77]:
 
 lower_blue = numpy.array([100,  50,  50])
-upper_blue = numpy.array([130, 255, 255])
+hard_blue = numpy.array([130, 255, 255])
 lower_red = numpy.array([ 170, 100, 50])
-upper_red = numpy.array([ 220, 255, 255])
+hard_red = numpy.array([ 220, 255, 255])
 params = cv2.SimpleBlobDetector_Params()
 params.filterByArea = True
 params.minArea = 5
 detector = cv2.SimpleBlobDetector(params)
 
 
-# In[78]:
 
 def blue_balls():
     hsv = cv2.cvtColor(p3dx.image, cv2.COLOR_RGB2HSV)
-    mask = cv2.inRange(hsv, lower_blue, upper_blue)
+    mask = cv2.inRange(hsv, lower_blue, hard_blue)
     reversemask = 255-mask
     keypoints = detector.detect(reversemask)
     l = []
@@ -46,7 +42,6 @@ def blue_balls():
     return l
 
 
-# In[79]:
 
 def is_ball_centered():
     b = blue_balls()
@@ -64,7 +59,6 @@ def is_ball_centered():
         return False
 
 
-# In[80]:
 
 def is_ball_close():
     b = blue_balls()
@@ -81,7 +75,7 @@ def is_ball_close():
             cy = ball[2]
             cx = ball[1]
     if cx > 90 or cx < 60:
-        print 'ball not in the center'
+        print('Ball isn\'t in the center')
         if cx > 80:
             revers = -1
         while not is_ball_centered():
@@ -92,11 +86,10 @@ def is_ball_close():
         return False
 
 
-# In[81]:
 
 def color_blob():
     hsv = cv2.cvtColor(p3dx.image, cv2.COLOR_RGB2HSV)
-    mask = cv2.inRange(hsv, lower_red, upper_red)
+    mask = cv2.inRange(hsv, lower_red, hard_red)
     M = cv2.moments(mask)
     area = M['m00']
     if area > 0:
@@ -108,7 +101,6 @@ def color_blob():
     return area, cx, cy
 
 
-# In[82]:
 
 def is_blob_centered():
     area, cx, cy = color_blob()
@@ -118,7 +110,6 @@ def is_blob_centered():
         return False
 
 
-# In[83]:
 
 def is_blob_close():
     area, cx, cy = color_blob()
@@ -128,27 +119,26 @@ def is_blob_close():
         return False
 
 
-# In[84]:
 
 def picking_ball():
     p3dx.tilt(-0.2)
     time.sleep(1)
-    print 'centring the ball'
+    print('Centring the ball')
     while not is_ball_centered():
         p3dx.move(-0.5,0.5)
     p3dx.move(0,0)
-    print 'going to the ball'
+    print('Going to the ball')
     while not is_ball_close():
         p3dx.move(2.0,2.0)
     p3dx.move(0.0,0.0)
-    print 'openning the gripper'
+    print('Openning the gripper')
     p3dx.tilt(-0.47)
     p3dx.gripper(0.05,1.0)
     time.sleep(1)
-    print 'going to the ball slowly'
+    print('Going to the ball slowly')
     while not is_ball_close():
         p3dx.move(0.5,0.5)
-    print 'picking the ball'
+    print('Picking the ball')
     p3dx.move(0.5,0.5)
     time.sleep(3.5)
     p3dx.move(0,0)
@@ -158,31 +148,29 @@ def picking_ball():
     time.sleep(1)
 
 
-# In[85]:
 
 def go_to_red():
     p3dx.tilt(-0.1)
-    print 'finding the red area'
+    print('Finding the red area')
     while not is_blob_centered():
         p3dx.move(-0.5, 0.5)
-    print 'going to the red area'
+    print('Going to the red area')
     while not is_blob_close():
         p3dx.move(2.0,2.0)
         area, cx = blue_ball_in_way()
         if area > 0:
-            print "ball in the way!!"
-            print cx
+            print("Ball in the way!!")
+            print(cx)
             avoid_ball(cx)
     p3dx.move(0.5, 0.5)
     p3dx.tilt(-0.22)
     time.sleep(1)
-    print 'going to the red area slowly'
+    print('Going to the red area slowly')
     while not is_blob_close():
         p3dx.move(0.5, 0.5)
     p3dx.move(0,0)
 
 
-# In[86]:
 
 def lose_ball():
     p3dx.gripper(0.05,0.0)
@@ -199,22 +187,18 @@ def lose_ball():
     p3dx.move(-0.5,0.5)
 
 
-# In[87]:
 
 def check_ball():
     p3dx.tilt(-0.47)
     time.sleep(1)
     hsv = cv2.cvtColor(p3dx.image, cv2.COLOR_RGB2HSV)
-    mask = cv2.inRange(hsv, lower_blue, upper_blue)
-    #print mask[70:80,70:80]
+    mask = cv2.inRange(hsv, lower_blue, hard_blue)
     return True if mask[70:80,70:80].any() > 0 else False
 
 
-# In[88]:
-
 def blue_ball_in_way():
     hsv = cv2.cvtColor(p3dx.image, cv2.COLOR_RGB2HSV)
-    mask = cv2.inRange(hsv, lower_blue, upper_blue)
+    mask = cv2.inRange(hsv, lower_blue, hard_blue)
     mask[0:90, 0:150] = 0
     mask[90:100, 0:50] = 0
     mask[90:100, 100:150] = 0
@@ -227,10 +211,9 @@ def blue_ball_in_way():
     return area, cx
 
 
-# In[89]:
 
 def avoid_ball(cx):
-    print "avoiding ball"
+    print("Avoiding ball")
     p3dx.move(0.5, 0.5)
     time.sleep(8)
     if cx > 75:
@@ -250,9 +233,7 @@ def avoid_ball(cx):
     p3dx.move(0, 0)
 
 
-# In[90]:
-
-try:     
+try:
     transfared_ball = 0
     while transfared_ball < 5:
         while not check_ball():
@@ -261,41 +242,10 @@ try:
         if check_ball():
             lose_ball()
             transfared_ball += 1
-            print transfared_ball
+            print(transfared_ball)
     p3dx.move(0,0)
-    print "FINALY DONE"
+    print("Finished!!")
 except KeyboardInterrupt:
     p3dx.stop()
 
 
-# ---
-# #### Try-a-Bot: an open source guide for robot programming
-# Developed by:
-# [![Robotic Intelligence Lab @ UJI](img/logo/robinlab.png "Robotic Intelligence Lab @ UJI")](http://robinlab.uji.es)
-# 
-# Sponsored by:
-# <table>
-# <tr>
-# <td style="border:1px solid #ffffff ;">
-# <a href="http://www.ieee-ras.org"><img src="img/logo/ras.png"></a>
-# </td>
-# <td style="border:1px solid #ffffff ;">
-# <a href="http://www.cyberbotics.com"><img src="img/logo/cyberbotics.png"></a>
-# </td>
-# <td style="border:1px solid #ffffff ;">
-# <a href="http://www.theconstructsim.com"><img src="img/logo/theconstruct.png"></a>
-# </td>
-# </tr>
-# </table>
-# 
-# Follow us:
-# <table>
-# <tr>
-# <td style="border:1px solid #ffffff ;">
-# <a href="https://www.facebook.com/RobotProgrammingNetwork"><img src="img/logo/facebook.png"></a>
-# </td>
-# <td style="border:1px solid #ffffff ;">
-# <a href="https://www.youtube.com/user/robotprogrammingnet"><img src="img/logo/youtube.png"></a>
-# </td>
-# </tr>
-# </table>

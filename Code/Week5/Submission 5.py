@@ -7,7 +7,6 @@
 # 
 # The aim is to program the robot for the first part of the challenge: follow the line from the beginning to the destination point. To do so, you need to reuse the abilities learnt in weeks 1-3; please feel free to reuse the code of those notebooks and exercises.
 
-# In[ ]:
 
 import packages.initialization
 import pioneer3dx as p3dx
@@ -20,28 +19,19 @@ import matplotlib.pyplot as plt
 p3dx.sleep(1)
 
 
-# In[ ]:
-
 MIN_WALL_THRESHOLD = 0.2 
 MAX_WALL_THRESHOLD = 0.3
 DEF_X_SPEED = 0.2 
-DEF_YAW_SPEED = 0.25#0.15
+DEF_YAW_SPEED = 0.25 # 0.15
 lower_purple = numpy.array([135, 100, 80])
-upper_purple = numpy.array([155, 255, 255])
+hard_purple = numpy.array([155, 255, 255])
 lower_green = numpy.array([65, 50, 50])
-upper_green = numpy.array([135, 255, 255])
-lower_blue = numpy.array([110, 100, 100])
-upper_blue = numpy.array([130, 255, 255])
-lower_red = numpy.array([0, 100, 100])
-upper_red = numpy.array([10, 255, 255])
+hard_green = numpy.array([135, 255, 255])
 WALLSIDE = 0
-GREENSIDE = 0
 
 def is_line_detected():
     hsv = cv2.cvtColor(p3dx.image, cv2.COLOR_RGB2HSV)
-    mask = cv2.inRange(hsv, lower_purple, upper_purple)
-    #mask[0:80, 0:150] = 0 # 0:50, 0:150??
-    #plt.imshow(mask)
+    mask = cv2.inRange(hsv, lower_purple, hard_purple)
     M = cv2.moments(mask)
     if M['m00'] == 0:
         return False
@@ -50,9 +40,8 @@ def is_line_detected():
 
 def is_line_detected_close():
     hsv = cv2.cvtColor(p3dx.image, cv2.COLOR_RGB2HSV)
-    mask = cv2.inRange(hsv, lower_purple, upper_purple)
-    mask[0:80, 0:150] = 0 # 0:50, 0:150??
-    #plt.imshow(mask)
+    mask = cv2.inRange(hsv, lower_purple, hard_purple)
+    mask[0:80, 0:150] = 0
     M = cv2.moments(mask)
     if M['m00'] == 0:
         return False
@@ -67,14 +56,14 @@ def follow_line():
     while not is_obstacle_detected() and not is_goal_detected():
         if is_green_detected():
             #print("green detected")
-            area, cx, cy = green_centroid(p3dx.image, lower_green, upper_green)
+            area, cx, cy = green_centroid(p3dx.image, lower_green, hard_green)
             kp = 0.3
             linear = 1
         else:
-            area, cx, cy = line_centroid(p3dx.image, lower_purple, upper_purple)
+            area, cx, cy = line_centroid(p3dx.image, lower_purple, hard_purple)
             kp = 0.1
             linear = 2
-        area, cx, cy = line_centroid(p3dx.image, lower_purple, upper_purple)
+        area, cx, cy = line_centroid(p3dx.image, lower_purple, hard_purple)
         linear = 2
         if area > 0:
             err = cx - (width/2)
@@ -102,7 +91,7 @@ def getSonars():
 
 def is_green_detected():
     hsv = cv2.cvtColor(p3dx.image, cv2.COLOR_RGB2HSV)
-    mask = cv2.inRange(hsv, lower_green, upper_green)
+    mask = cv2.inRange(hsv, lower_green, hard_green)
     mask[0:50, 0:150] = 0
     M = cv2.moments(mask)
     area = M['m00']
@@ -159,7 +148,7 @@ def getWall():
     
 def is_goal_detected():
     hsv = cv2.cvtColor(p3dx.image, cv2.COLOR_RGB2HSV)
-    mask = cv2.inRange(hsv, lower_green, upper_green)
+    mask = cv2.inRange(hsv, lower_green, hard_green)
     mask[0:50, 0:150] = 0
     #plt.imshow(mask)
     M = cv2.moments(mask)
@@ -287,9 +276,6 @@ def getLine(WALLSIDE):
 
 p3dx.tilt(-0.47)
 try:
-    #print(getSonars())
-    #print(is_goal_detected())
-    #plt.imshow(p3dx.image)
     follow_line()
     getWall()
     getLine(follow_wall(WALLSIDE))
@@ -301,49 +287,12 @@ except KeyboardInterrupt:
     move(0,0)
 
 
-# ---
-# #### Try-a-Bot: an open source guide for robot programming
-# Developed by:
-# [![Robotic Intelligence Lab @ UJI](img/logo/robinlab.png "Robotic Intelligence Lab @ UJI")](http://robinlab.uji.es)
-# 
-# Sponsored by:
-# <table>
-# <tr>
-# <td style="border:1px solid #ffffff ;">
-# <a href="http://www.ieee-ras.org"><img src="img/logo/ras.png"></a>
-# </td>
-# <td style="border:1px solid #ffffff ;">
-# <a href="http://www.cyberbotics.com"><img src="img/logo/cyberbotics.png"></a>
-# </td>
-# <td style="border:1px solid #ffffff ;">
-# <a href="http://www.theconstructsim.com"><img src="img/logo/theconstruct.png"></a>
-# </td>
-# </tr>
-# </table>
-# 
-# Follow us:
-# <table>
-# <tr>
-# <td style="border:1px solid #ffffff ;">
-# <a href="https://www.facebook.com/RobotProgrammingNetwork"><img src="img/logo/facebook.png"></a>
-# </td>
-# <td style="border:1px solid #ffffff ;">
-# <a href="https://www.youtube.com/user/robotprogrammingnet"><img src="img/logo/youtube.png"></a>
-# </td>
-# </tr>
-# </table>
 
-# In[ ]:
+green_centroid(p3dx.image, lower_green, hard_green)
 
-green_centroid(p3dx.image, lower_green, upper_green)
-
-
-# In[ ]:
 
 is_green_detected()
 
-
-# In[ ]:
 
 
 
